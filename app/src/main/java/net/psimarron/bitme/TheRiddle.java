@@ -1,12 +1,12 @@
 package net.psimarron.bitme;
 
-import android.support.v7.app.ActionBarActivity;
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class TheRiddle extends ActionBarActivity {
+public class TheRiddle extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
