@@ -3,8 +3,6 @@ package net.psimarron.bitme;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +16,7 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     private TextView m_guess;
 
     private TextView[] m_bits;
+    private float m_touchStart;
 
     private void newRiddle() {
         m_currentRiddle = new Riddle(this);
@@ -36,38 +35,17 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
         m_bits = new TextView[Riddle.NUMBER_OF_BITS];
 
         for (int i = 0; i < m_bits.length; i++) {
-            TextView bit = (TextView) inflater.inflate(R.layout.bit, null);
+            ViewGroup template = (ViewGroup) inflater.inflate(R.layout.bit, null);
+            TextView bit = (TextView) template.findViewById(R.id.bit_display);
 
-            bit.setTag(new Integer((Riddle.NUMBER_OF_BITS - 1) - i));
+            bit.setTag(new Integer(i));
             bit.setOnTouchListener(this);
 
-            view.addView(m_bits[i] = bit);
+            template.removeView(bit);
+            view.addView(m_bits[i] = bit, 0);
         }
 
         newRiddle();
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_the_riddle, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -87,13 +65,21 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         int action = event.getAction();
-        if (action == MotionEvent.ACTION_DOWN)
+
+        if (action == MotionEvent.ACTION_DOWN) {
+            m_touchStart = event.getX();
             return true;
+        }
+
         if (action != MotionEvent.ACTION_UP)
             return false;
 
         Integer index = (Integer) v.getTag();
         if (index == null)
+            return false;
+
+        float moveX = event.getX() - m_touchStart;
+        if (Math.abs(moveX) < 100)
             return false;
 
         m_currentRiddle.move(index);

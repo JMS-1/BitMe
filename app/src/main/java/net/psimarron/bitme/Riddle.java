@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Riddle {
 
-    public static final int NUMBER_OF_BITS = 10;
+    public static final int NUMBER_OF_BITS = 8;
     private final static Random s_generator = new Random();
     private final int m_number;
     private final ChangeListener m_listener;
@@ -17,8 +17,8 @@ public class Riddle {
         // Hier melden wir alle Änderungen
         m_listener = listener;
 
-        // Irgend eine Zahl
-        m_number = s_generator.nextInt(1 << NUMBER_OF_BITS);
+        // Irgend eine Zahl, nur nicht alles 0 oder alles 1
+        m_number = 1 + s_generator.nextInt((1 << NUMBER_OF_BITS) - 2);
 
         // Das ist auch der erste Rateversuch
         m_guess = m_number;
@@ -30,8 +30,11 @@ public class Riddle {
             swap(i, i + 1);
         }
 
-        // Die erste Änderung
-        m_listener.onGuessChanged(this);
+        // Wenn es jetzt schon passt müssen wir korrigieren ansonsten können wir den Anfangsstand einfach schon mal melden
+        if (isMatch())
+            move(0);
+        else
+            m_listener.onGuessChanged(this);
     }
 
     public void move(int i) {
@@ -73,11 +76,7 @@ public class Riddle {
     }
 
     public boolean isMatch() {
-        for (int i = 0, mask = 1; i < NUMBER_OF_BITS; i++, mask += mask)
-            if ((m_number & mask) != (m_guess & mask))
-                return false;
-
-        return true;
+        return (m_guess == m_number);
     }
 
     public int getGoal() {
