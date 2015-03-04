@@ -6,10 +6,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 
-public class TheRiddle extends Activity implements Riddle.ChangeListener, View.OnTouchListener {
+public class TheRiddle extends Activity implements Riddle.ChangeListener, View.OnTouchListener, Animation.AnimationListener {
 
     private Riddle m_currentRiddle;
 
@@ -18,8 +21,14 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     private TextView[] m_bits;
     private float m_touchStart;
 
+    private int m_currentAnimation = -1;
+
+    // Erstellt ein neues Rätsel.
     private void newRiddle() {
         m_currentRiddle = new Riddle(this);
+
+        // Wir passen auch die Überschrift entsprechend an
+        setTitle(getResources().getString(R.string.app_title, m_currentRiddle.getGoal()));
     }
 
     @Override
@@ -50,8 +59,6 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
 
     @Override
     public void onGuessChanged(Riddle riddle) {
-        setTitle(Integer.toString(riddle.getGoal()));
-
         m_guess.setText(Integer.toString(riddle.getGuess()));
 
         for (int i = 0; i < m_bits.length; i++) {
@@ -64,26 +71,67 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        // Solange das Feedback nicht abgeschlossen ist geht hier gar nichts
+        if (m_currentAnimation >= 0)
+            return false;
+
         int action = event.getAction();
 
+        // Zu Beginn einer Geste merken wir uns die horizontale Position
         if (action == MotionEvent.ACTION_DOWN) {
             m_touchStart = event.getX();
             return true;
         }
 
+        // Ansonsten interessiert nur das Ende der Geste
         if (action != MotionEvent.ACTION_UP)
             return false;
 
+        // Jedes Bitelement enthält die laufenden Nummer des angezeigten Bits
         Integer index = (Integer) v.getTag();
         if (index == null)
             return false;
 
+        // Wir reagieren erst ab einem willkürlich gewählten Mindestenabstand
         float moveX = event.getX() - m_touchStart;
         if (Math.abs(moveX) < 100)
             return false;
 
-        m_currentRiddle.move(index);
+        // Feedback für den Anwender starten
+        startAnimation(index, moveX < 0);
 
         return true;
+    }
+
+    // Beginnt mit der Animation als Feedback für den Anwender.
+    private void startAnimation(int index, boolean flingLeft) {
+        m_currentAnimation = index;
+
+        AnimationSet animations = new AnimationSet(true);
+
+        Animation fling = new TranslateAnimation(0, flingLeft ? -200 : 200, 0, 0);
+        fling.setDuration(200);
+        fling.setAnimationListener(this);
+
+        animations.addAnimation(fling);
+        animations.start();
+
+        m_bits[index].startAnimation(fling);
+    }
+
+    @Override
+    public void onAnimationStart(Animation animation) {
+    }
+
+    @Override
+    public void onAnimationEnd(Animation animation) {
+        int index = m_currentAnimation;
+
+        m_currentAnimation = -1;
+        m_currentRiddle.move(index);
+    }
+
+    @Override
+    public void onAnimationRepeat(Animation animation) {
     }
 }

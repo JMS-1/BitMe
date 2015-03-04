@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BitMe</string>
+    <string name="app_title">BitMe %1$d</string>
 </resources>
