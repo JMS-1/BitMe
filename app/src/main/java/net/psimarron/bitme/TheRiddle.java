@@ -107,16 +107,29 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     private void startAnimation(int index, boolean flingLeft) {
         m_currentAnimation = index;
 
-        AnimationSet animations = new AnimationSet(true);
+        // Das gesamte Feedback ist etwas umfangreicher
+        AnimationSet allBitAnimation = new AnimationSet(true);
 
-        Animation fling = new TranslateAnimation(0, flingLeft ? -200 : 200, 0, 0);
-        fling.setDuration(200);
-        fling.setAnimationListener(this);
+        // Wir kümmern uns erst einmal um das vom Anwender bewegte Bit
+        AnimationSet bitAnimation = new AnimationSet(true);
+        bitAnimation.setAnimationListener(this);
 
-        animations.addAnimation(fling);
-        animations.start();
+        Animation flingOut = new TranslateAnimation(0, flingLeft ? -200 : 200, 0, 0);
+        flingOut.setDuration(200);
 
-        m_bits[index].startAnimation(fling);
+        Animation flingIn = new TranslateAnimation(0, flingLeft ? 200 : -200, 0, 0);
+        flingIn.setStartOffset(200);
+        flingIn.setDuration(200);
+
+        bitAnimation.addAnimation(flingOut);
+        bitAnimation.addAnimation(flingIn);
+
+        // Alles zusammen vorbereiten
+        allBitAnimation.addAnimation(bitAnimation);
+        allBitAnimation.start();
+
+        // Und alles starten
+        m_bits[index].startAnimation(bitAnimation);
     }
 
     @Override
