@@ -12,7 +12,22 @@ import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 
-public class TheRiddle extends Activity implements Riddle.ChangeListener, View.OnTouchListener, Animation.AnimationListener {
+public class TheRiddle extends Activity implements Riddle.ChangeListener, View.OnTouchListener {
+
+    // Die Weite der horizontalen Verschiebung des ausgewählten Bits.
+    private final int ANIMATION_OFFSET = 200;
+
+    // Die Zeit in Millisekunden für die horizontale Verschiebung bis zur weitesten Entfernung.
+    private final int ANIMATION_TIME_FLING = 200;
+
+    // Die Startverzögerung in Millisekunden für den Beginn des freien Falls.
+    private final int ANIMATION_TIME_FALL_OFFSET = ANIMATION_TIME_FLING / 4;
+
+    // Die Startverzögerung in Millisekunden zwischen dem Fall der einzelnen Bits.
+    private final int ANIMATION_TIME_FALL_DELAY = ANIMATION_TIME_FALL_OFFSET;
+
+    // Die Fallzeit in Millisekunden für jedes einzelne Bit.
+    private final int ANIMATION_TIME_FALL = 4 * ANIMATION_TIME_FLING - 2 * (ANIMATION_TIME_FALL_OFFSET + ANIMATION_TIME_FALL_DELAY);
 
     private Riddle m_currentRiddle;
 
@@ -107,44 +122,91 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     private void startAnimation(int index, boolean flingLeft) {
         m_currentAnimation = index;
 
-        // Das gesamte Feedback ist etwas umfangreicher
+        // Wir vereinfachen uns den gemeinsamen Start
         AnimationSet allBitAnimation = new AnimationSet(true);
 
         // Wir kümmern uns erst einmal um das vom Anwender bewegte Bit
         AnimationSet bitAnimation = new AnimationSet(true);
-        bitAnimation.setAnimationListener(this);
+        allBitAnimation.addAnimation(bitAnimation);
+        m_bits[index].setAnimation(bitAnimation);
 
-        Animation flingOut = new TranslateAnimation(0, flingLeft ? -200 : 200, 0, 0);
-        flingOut.setDuration(200);
-
-        Animation flingIn = new TranslateAnimation(0, flingLeft ? 200 : -200, 0, 0);
-        flingIn.setStartOffset(200);
-        flingIn.setDuration(200);
-
+        // Der Bewegung der Geste folgen und aus der Reihe ausscheren
+        Animation flingOut = new TranslateAnimation(0, flingLeft ? -ANIMATION_OFFSET : ANIMATION_OFFSET, 0, 0);
         bitAnimation.addAnimation(flingOut);
+        flingOut.setStartOffset(0);
+        flingOut.setDuration(ANIMATION_TIME_FLING);
+
+        // Zeitpunkt ermitteln
+        long endOfTimeline = flingOut.getDuration();
+
+        if (index < m_bits.length - 1) {
+            // Das Fallen beginnt leicht verzögert
+            endOfTimeline = ANIMATION_TIME_FALL_OFFSET;
+
+            // Alles über uns verschieben
+            for (int i = index; i < m_bits.length - 1; ) {
+                // Pause zwischen den Bits einfügen
+                if (i++ > index)
+                    endOfTimeline += ANIMATION_TIME_FALL_DELAY - ANIMATION_TIME_FALL;
+
+                // Die Bits fallen einfach herunter
+                Animation fall = new TranslateAnimation(0, 0, 0, m_bits[i - 1].getY() - m_bits[i].getY());
+                allBitAnimation.addAnimation(fall);
+                fall.setStartOffset(endOfTimeline);
+                fall.setDuration(ANIMATION_TIME_FALL);
+                fall.setFillAfter(true);
+                m_bits[i].setAnimation(fall);
+
+                // Zeit korrigieren
+                endOfTimeline += fall.getDuration();
+            }
+
+            // Schauen wir mal, ob wir steigen müssen
+            long riseTime = endOfTimeline - 2 * flingOut.getDuration();
+            if (riseTime > 0) {
+                Animation rise = new TranslateAnimation(0, 0, 0, m_bits[m_bits.length - 1].getY() - m_bits[index].getY());
+                bitAnimation.addAnimation(rise);
+                rise.setStartOffset(flingOut.getDuration());
+                rise.setDuration(riseTime);
+            }
+
+            // Zeit entsprechend korrigieren
+            endOfTimeline -= flingOut.getDuration();
+        }
+
+        // Zurück in die Reihe
+        Animation flingIn = new TranslateAnimation(0, flingLeft ? ANIMATION_OFFSET : -ANIMATION_OFFSET, 0, 0);
         bitAnimation.addAnimation(flingIn);
+        flingIn.setStartOffset(endOfTimeline);
+        flingIn.setDuration(flingOut.getDuration());
 
         // Alles zusammen vorbereiten
-        allBitAnimation.addAnimation(bitAnimation);
         allBitAnimation.start();
 
-        // Und alles starten
-        m_bits[index].startAnimation(bitAnimation);
-    }
+        // Auf das Ende warten
+        flingIn.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
 
-    @Override
-    public void onAnimationStart(Animation animation) {
-    }
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                int index = m_currentAnimation;
 
-    @Override
-    public void onAnimationEnd(Animation animation) {
-        int index = m_currentAnimation;
+                for (int i = index; i < m_bits.length; i++)
+                    m_bits[i].clearAnimation();
 
-        m_currentAnimation = -1;
-        m_currentRiddle.move(index);
-    }
+                m_currentAnimation = -1;
+                m_currentRiddle.move(index);
+            }
 
-    @Override
-    public void onAnimationRepeat(Animation animation) {
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+
+        // Die Animationen den visuellen Elementen zuordnen
+        for (int i = index; i < m_bits.length; i++)
+            m_bits[i].startAnimation(m_bits[i].getAnimation());
     }
 }
