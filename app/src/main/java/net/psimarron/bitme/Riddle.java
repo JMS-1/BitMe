@@ -11,7 +11,10 @@ public class Riddle {
     private final static Random s_generator = new Random();
 
     // Die zu ratende Zahl.
-    private final int m_number;
+    public final int Goal;
+
+    // Die minimale Anzahl von Verschiebungen.
+    public final int Par;
 
     // Informiert über Änderungen.
     private final ChangeListener m_listener;
@@ -19,19 +22,19 @@ public class Riddle {
     // Der aktuelle Rateversuch.
     private int m_guess;
 
+    // Die Anzahl der Versuche.
+    private int m_tries;
+
     // Erstellt ein neues Rätsel.
     public Riddle(ChangeListener listener) {
         if (listener == null)
             throw new IllegalArgumentException("listener");
 
-        // Hier melden wir alle Änderungen
-        m_listener = listener;
-
         // Irgend eine Zahl, nur nicht alles 0 oder alles 1, sonst gibt es keinen abweichenden Anfangsratewert
-        m_number = 1 + s_generator.nextInt((1 << NUMBER_OF_BITS) - 2);
+        Goal = 1 + s_generator.nextInt((1 << NUMBER_OF_BITS) - 2);
 
         // Das ist auch der erste Rateversuch
-        m_guess = m_number;
+        m_guess = Goal;
 
         // Und dann würfeln wir das ordentlich durcheinander
         for (int n = NUMBER_OF_BITS * 2; n-- > 0; ) {
@@ -41,22 +44,27 @@ public class Riddle {
             swap(i, i + 1);
         }
 
-        // Wenn es jetzt schon passt müssen wir korrigieren ansonsten können wir den Anfangsstand einfach schon mal melden
+        // Wenn es jetzt schon passt müssen wir korrigieren ansonsten
         if (isMatch())
             move(0);
-        else
-            m_listener.onGuessChanged(this);
+
+        // Minimale Anzahl von Versuchen ermitteln
+        Par = RiddleAnalyser.getPar(this);
+
+        // Anfangsstand melden
+        m_listener = listener;
+        m_listener.onGuessChanged(this);
     }
 
-    // Der Spieler hat eine Bitposition ausgewählt, die dann entfernt und deren Wert ganz nach oben gesetzt wird.
-    public void move(int i) {
+    // Verschiebt eine einzelne Bitposition.
+    public static int move(int number, int i) {
         if (i < 0)
             throw new IllegalArgumentException("i");
         if (i >= NUMBER_OF_BITS)
             throw new IllegalArgumentException("i");
 
         // So war es vorher
-        int guess = m_guess;
+        int guess = number;
 
         // Der alte Wert hat so in etwa das Format <unberührter linker Teil> <gewählte Position> <inberührter rechter Teil>
         int mask = 1 << i;
@@ -65,11 +73,22 @@ public class Riddle {
         int left = guess >> (i + 1);
 
         // Das bauen wir dann um in <gewählte Position> <unberührter linker Teil> <inberührter rechter Teil>
-        m_guess = (bit << (NUMBER_OF_BITS - 1)) | (left << i) | right;
+        return (bit << (NUMBER_OF_BITS - 1)) | (left << i) | right;
+    }
+
+    // Der Spieler hat eine Bitposition ausgewählt, die dann entfernt und deren Wert ganz nach oben gesetzt wird.
+    public void move(int i) {
+        // So war es vorher
+        int guess = m_guess;
+
+        // So ist es nachher - wir zählen auch die Versuche
+        m_guess = move(guess, i);
+        m_tries++;
 
         // Nur wenn sich etwas verändert hat müssen wir auch die Anzeige erneuern
         if (guess != m_guess)
-            m_listener.onGuessChanged(this);
+            if (m_listener != null)
+                m_listener.onGuessChanged(this);
     }
 
     // Meldet ein Bit des aktuell geratenden Wertes.
@@ -96,17 +115,17 @@ public class Riddle {
 
     // Meldet, ob der Zielwert zusammengebaut wurde.
     public boolean isMatch() {
-        return (m_guess == m_number);
-    }
-
-    // Meldet den Zielwert.
-    public int getGoal() {
-        return m_number;
+        return (m_guess == Goal);
     }
 
     // Meldet den aktuellen Ratewert.
     public int getGuess() {
         return m_guess;
+    }
+
+    // Meldet die Anzahl der Versuche.
+    public int getTries() {
+        return m_tries;
     }
 
     // Über diese Schnittstelle erfolgen alle Benachrichtigungen.

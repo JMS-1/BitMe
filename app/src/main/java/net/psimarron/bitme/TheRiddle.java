@@ -1,6 +1,7 @@
 package net.psimarron.bitme;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -43,7 +44,10 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
         m_currentRiddle = new Riddle(this);
 
         // Wir passen auch die Überschrift entsprechend an
-        setTitle(getResources().getString(R.string.app_title, m_currentRiddle.getGoal()));
+        setTitle(getResources().getString(R.string.app_title, m_currentRiddle.Goal));
+
+        // Und den Hinweis auf die minimal benötigte Anzahl von Verschiebungen
+        m_guess.setText(Integer.toString(m_currentRiddle.Par));
     }
 
     @Override
@@ -66,7 +70,7 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
             bit.setOnTouchListener(this);
 
             template.removeView(bit);
-            view.addView(m_bits[i] = bit, 0);
+            view.addView(m_bits[i] = bit, 1);
         }
 
         newRiddle();
@@ -74,14 +78,19 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
 
     @Override
     public void onGuessChanged(Riddle riddle) {
-        m_guess.setText(Integer.toString(riddle.getGuess()));
-
         for (int i = 0; i < m_bits.length; i++) {
             TextView bit = m_bits[i];
             Integer index = (Integer) bit.getTag();
 
             bit.setText(riddle.get(index) ? "1" : "0");
         }
+
+        if (!riddle.isMatch())
+            m_guess.setBackgroundColor(Color.TRANSPARENT);
+        else if (riddle.getTries() > riddle.Par)
+            m_guess.setBackgroundColor(Color.RED);
+        else
+            m_guess.setBackgroundColor(Color.GREEN);
     }
 
     @Override

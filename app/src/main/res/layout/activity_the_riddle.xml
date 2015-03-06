@@ -9,6 +9,8 @@
         style="@android:style/TextAppearance.Large"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="right"
+        android:layout_margin="5dp"
+        android:padding="10dp" />
 
 </LinearLayout>
