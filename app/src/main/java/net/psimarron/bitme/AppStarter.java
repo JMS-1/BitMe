@@ -17,7 +17,10 @@ public class AppStarter extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_app_starter);
+        // Wir müssen sicherstellen, dass der Anwender auch bis zur Schaltfläche navigieren kann
+        View view = getLayoutInflater().inflate(R.layout.activity_app_starter, null);
+
+        setContentView(view);
 
         // Die eigentliche Beschreibung wird aus einer separaten Ressource ausgelesen
         try {
@@ -30,7 +33,7 @@ public class AppStarter extends Activity {
                     for (int n; (n = reader.read(buffer, 0, buffer.length)) > 0; )
                         string.write(buffer, 0, n);
 
-                    TextView intro = (TextView) findViewById(R.id.intro);
+                    TextView intro = (TextView) view.findViewById(R.id.intro);
                     intro.setText(string.toString("UTF-8"));
                 } finally {
                     string.close();

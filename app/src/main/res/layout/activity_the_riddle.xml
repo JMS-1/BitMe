@@ -19,8 +19,7 @@
             android:layout_alignParentTop="true"
             android:layout_margin="5dp"
             android:background="@drawable/par_state"
-            android:gravity="center"
-            android:padding="10dp" />
+            android:gravity="center_horizontal|center_vertical" />
     </RelativeLayout>
 
 </RelativeLayout>
