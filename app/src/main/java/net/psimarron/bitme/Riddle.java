@@ -18,10 +18,13 @@ public class Riddle {
 
     // Informiert über Änderungen.
     private final ChangeListener m_listener;
+
     // Der erste Rateversuch.
     private final int m_firstGuess;
+
     // Der aktuelle Rateversuch.
     private int m_guess;
+
     // Die Anzahl der Versuche.
     private int m_tries;
 

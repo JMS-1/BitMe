@@ -10,14 +10,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-
+// Auf der Startseite wird das Spiel kurz erklärt.
 public class AppStarter extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_app_starter);
 
+        // Die eigentliche Beschreibung wird aus einer separaten Ressource ausgelesen
         try {
             InputStream reader = getResources().openRawResource(R.raw.intro);
             try {
@@ -41,7 +43,9 @@ public class AppStarter extends Activity {
         }
     }
 
+    // Der Anwender möchte das Spiel nun starten.
     public void onStart(View starter) {
+        // Wir erzeugen einen neuen Task und stellen insbesondere sicher, dass die Einführungsseite aus der Historie verschwindet
         Intent intent = new Intent();
         intent.setClass(this, TheRiddle.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

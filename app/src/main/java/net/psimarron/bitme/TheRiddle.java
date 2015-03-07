@@ -14,7 +14,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-
+// Das ist die Aktivität mit dem eigentlichen Spiel.
 public class TheRiddle extends Activity implements Riddle.ChangeListener, View.OnTouchListener {
 
     // Die Weite der horizontalen Verschiebung des ausgewählten Bits.
@@ -32,14 +32,19 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     // Die Fallzeit in Millisekunden für jedes einzelne Bit.
     private final int ANIMATION_TIME_FALL = 4 * ANIMATION_TIME_FLING - 2 * (ANIMATION_TIME_FALL_OFFSET + ANIMATION_TIME_FALL_DELAY);
 
+    // Das aktuelle Rätsel.
     private Riddle m_currentRiddle;
 
+    // Die Anzeige der minimalen Anzahl von Vertauschungen.
     private TextView m_guess;
 
+    // Die Anzeige der einzelnen Bits.
     private View[] m_bits;
 
+    // Merkt sich den Anfang einer Geste.
     private float m_touchStart;
 
+    // Enthält die Position des aktuell animierten Bits.
     private int m_currentAnimation = -1;
 
     // Erstellt ein neues Rätsel.
@@ -57,26 +62,33 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Die äußere visuelle Darstellung
         LayoutInflater inflater = getLayoutInflater();
         View content = inflater.inflate(R.layout.activity_the_riddle, null);
 
         setContentView(content);
 
+        // Im Moment verwenden wir eine geschachtelte Darstellung zum Abblenden des Hintergrunds - TODO: vermutlich wöre das eher eine Aufgabe für ein LayerDrawable
         RelativeLayout view = (RelativeLayout) content.findViewById(R.id.game_container);
 
+        // Die relevanten Oberflächenelemente
         m_guess = (TextView) findViewById(R.id.view_guess);
         m_bits = new View[Riddle.NUMBER_OF_BITS];
 
+        // Für jedes Bit wird dynamisch eine entsprechende Repräsentation erzeugt
         for (int i = 0; i < m_bits.length; i++) {
+            // Am einfachsten geht das aus einer Vorlage - die zusätzliche Schachtelung erleichtert die Manipulation der LayoutParameter
             RelativeLayout template = (RelativeLayout) inflater.inflate(R.layout.bit, null);
             View bit = template.findViewById(R.id.bit_display);
 
             template.removeView(bit);
 
+            // Die Anzeige des Bits vorbereiten
             bit.setId(R.id.view_guess + 1 + i);
             bit.setTag(new Integer(i));
             bit.setOnTouchListener(this);
 
+            // Nun noch die Anordnung der Bits geeignet konfigurieren
             RelativeLayout.LayoutParams layout = (RelativeLayout.LayoutParams) bit.getLayoutParams();
 
             layout.addRule(RelativeLayout.CENTER_HORIZONTAL);
@@ -85,14 +97,17 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
             else
                 layout.addRule(RelativeLayout.BELOW, bit.getId() + 1);
 
+            // Und dann merken wir uns die Präsentation und schalten die Anzeige frei
             view.addView(m_bits[i] = bit);
         }
 
+        // Zeit für das erste Rätsel
         newRiddle();
     }
 
     @Override
     public void onGuessChanged(Riddle riddle) {
+        // Die Präsentation wird auf Basis der Daten neu angepasst
         for (int i = 0; i < m_bits.length; i++) {
             View bit = m_bits[i];
             Integer index = (Integer) bit.getTag();
@@ -100,13 +115,16 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
             bit.setActivated(riddle.get(index));
         }
 
+        // Dieses Feedback ist vor allem zu Ende des Spiels relevant
         m_guess.setActivated(riddle.isMatch());
         m_guess.setSelected(riddle.getTries() <= riddle.Par);
 
+        // Das Spiel ist zu Ende, wenn die gewünschte Zahl hergestellt wurde
         if (riddle.isMatch())
             won();
     }
 
+    // Gewinnen ist langweilig, es kommt einfach nur ein Dialog.
     private void won() {
         new AlertDialog.Builder(this)
                 .setMessage(R.string.won)
@@ -224,10 +242,13 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
             public void onAnimationEnd(Animation animation) {
                 int index = m_currentAnimation;
 
+                m_currentAnimation = -1;
+
+                // Alle Präsentationen werden nun an den korrekten Platz geschoben
                 for (int i = index; i < m_bits.length; i++)
                     m_bits[i].clearAnimation();
 
-                m_currentAnimation = -1;
+                // Und schließlich die Bitvertauschung vorgenommen
                 m_currentRiddle.move(index);
             }
 
@@ -236,7 +257,7 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
             }
         });
 
-        // Die Animationen den visuellen Elementen zuordnen
+        // Die Animationen den visuellen Elementen zuordnen und loslaufen lassen
         for (int i = index; i < m_bits.length; i++)
             m_bits[i].startAnimation(m_bits[i].getAnimation());
     }
@@ -252,9 +273,11 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_new:
+                // Mit neuer Zahl starten
                 newRiddle();
                 return true;
             case R.id.action_reset:
+                // Mit der selben Zahl und der selben Anordnung der Bits starten
                 m_currentRiddle.restart();
                 return true;
         }
