@@ -1,20 +1,26 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
-    android:padding="10dp">
+    android:background="@drawable/background">
 
-    <TextView
-        android:id="@+id/view_guess"
-        style="@android:style/TextAppearance.Large"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="5dp"
-        android:background="@drawable/par_state"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="9" />
+    <RelativeLayout
+        android:id="@+id/game_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/game_background"
+        android:padding="10dp">
+
+        <TextView
+            android:id="@+id/view_guess"
+            style="@android:style/TextAppearance.Large"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="5dp"
+            android:background="@drawable/par_state"
+            android:gravity="center"
+            android:padding="10dp" />
+    </RelativeLayout>
 
 </RelativeLayout>

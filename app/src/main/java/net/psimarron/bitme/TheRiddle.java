@@ -24,7 +24,7 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     private final int ANIMATION_TIME_FLING = 200;
 
     // Die Startverzögerung in Millisekunden für den Beginn des freien Falls.
-    private final int ANIMATION_TIME_FALL_OFFSET = ANIMATION_TIME_FLING / 4;
+    private final int ANIMATION_TIME_FALL_OFFSET = ANIMATION_TIME_FLING / 2;
 
     // Die Startverzögerung in Millisekunden zwischen dem Fall der einzelnen Bits.
     private final int ANIMATION_TIME_FALL_DELAY = ANIMATION_TIME_FALL_OFFSET;
@@ -36,7 +36,8 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
 
     private TextView m_guess;
 
-    private TextView[] m_bits;
+    private View[] m_bits;
+
     private float m_touchStart;
 
     private int m_currentAnimation = -1;
@@ -57,16 +58,18 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
         super.onCreate(savedInstanceState);
 
         LayoutInflater inflater = getLayoutInflater();
-        RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.activity_the_riddle, null);
+        View content = inflater.inflate(R.layout.activity_the_riddle, null);
 
-        setContentView(view);
+        setContentView(content);
+
+        RelativeLayout view = (RelativeLayout) content.findViewById(R.id.game_container);
 
         m_guess = (TextView) findViewById(R.id.view_guess);
-        m_bits = new TextView[Riddle.NUMBER_OF_BITS];
+        m_bits = new View[Riddle.NUMBER_OF_BITS];
 
         for (int i = 0; i < m_bits.length; i++) {
             RelativeLayout template = (RelativeLayout) inflater.inflate(R.layout.bit, null);
-            TextView bit = (TextView) template.findViewById(R.id.bit_display);
+            View bit = template.findViewById(R.id.bit_display);
 
             template.removeView(bit);
 
@@ -91,10 +94,10 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     @Override
     public void onGuessChanged(Riddle riddle) {
         for (int i = 0; i < m_bits.length; i++) {
-            TextView bit = m_bits[i];
+            View bit = m_bits[i];
             Integer index = (Integer) bit.getTag();
 
-            bit.setText(riddle.get(index) ? "1" : "0");
+            bit.setActivated(riddle.get(index));
         }
 
         m_guess.setActivated(riddle.isMatch());
