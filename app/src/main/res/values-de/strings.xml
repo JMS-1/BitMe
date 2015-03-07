@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">BitMe</string>
+    <string name="app_title">BitMe %1$d</string>
+    <string name="action_new">Neu</string>
+    <string name="action_restart">Nochmal</string>
+    <string name="won">Na super, das hat ja geklappt.</string>
+    <string name="won_close">Ich freue mich</string>
+    <string name="start">Das will ich probieren</string>
+</resources>

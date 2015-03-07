@@ -18,18 +18,15 @@ public class Riddle {
 
     // Informiert über Änderungen.
     private final ChangeListener m_listener;
-
+    // Der erste Rateversuch.
+    private final int m_firstGuess;
     // Der aktuelle Rateversuch.
     private int m_guess;
-
     // Die Anzahl der Versuche.
     private int m_tries;
 
     // Erstellt ein neues Rätsel.
     public Riddle(ChangeListener listener) {
-        if (listener == null)
-            throw new IllegalArgumentException("listener");
-
         // Irgend eine Zahl, nur nicht alles 0 oder alles 1, sonst gibt es keinen abweichenden Anfangsratewert
         Goal = 1 + s_generator.nextInt((1 << NUMBER_OF_BITS) - 2);
 
@@ -51,9 +48,12 @@ public class Riddle {
         // Minimale Anzahl von Versuchen ermitteln
         Par = RiddleAnalyser.getPar(this);
 
-        // Anfangsstand melden
+        // Anfangsstand merken
         m_listener = listener;
-        m_listener.onGuessChanged(this);
+        m_firstGuess = m_guess;
+
+        // Und melden
+        onGuessChanged();
     }
 
     // Verschiebt eine einzelne Bitposition.
@@ -87,8 +87,13 @@ public class Riddle {
 
         // Nur wenn sich etwas verändert hat müssen wir auch die Anzeige erneuern
         if (guess != m_guess)
-            if (m_listener != null)
-                m_listener.onGuessChanged(this);
+            onGuessChanged();
+    }
+
+    // Meldet eine Veränderung am Ratestand
+    private void onGuessChanged() {
+        if (m_listener != null)
+            m_listener.onGuessChanged(this);
     }
 
     // Meldet ein Bit des aktuell geratenden Wertes.
@@ -126,6 +131,20 @@ public class Riddle {
     // Meldet die Anzahl der Versuche.
     public int getTries() {
         return m_tries;
+    }
+
+    // Das selbe Rätsel von vorne.
+    public void restart() {
+        // Hm, da sind wir aber schon
+        if (m_guess == m_firstGuess)
+            return;
+
+        // Zurücksetzen
+        m_guess = m_firstGuess;
+        m_tries = 0;
+
+        // Und melden
+        onGuessChanged();
     }
 
     // Über diese Schnittstelle erfolgen alle Benachrichtigungen.

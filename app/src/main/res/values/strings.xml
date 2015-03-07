@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">BitMe</string>
     <string name="app_title">BitMe %1$d</string>
+    <string name="action_new">New</string>
+    <string name="action_restart">Restart</string>
+    <string name="won">Good job, you did it.</string>
+    <string name="won_close">Let me be happy</string>
+    <string name="title_activity_app_starter">AppStarter</string>
+    <string name="start">Let me try it</string>
 </resources>
