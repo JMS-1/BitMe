@@ -2,7 +2,6 @@ package net.psimarron.bitme;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -98,19 +97,11 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
             bit.setText(riddle.get(index) ? "1" : "0");
         }
 
-        if (!riddle.isMatch()) {
-            // Im Wesentlichen weiter machen
-            m_guess.setBackgroundColor(Color.TRANSPARENT);
-            return;
-        }
+        m_guess.setActivated(riddle.isMatch());
+        m_guess.setSelected(riddle.getTries() <= riddle.Par);
 
-        // Ergebnis visualisieren
-        if (riddle.getTries() > riddle.Par)
-            m_guess.setBackgroundColor(Color.RED);
-        else
-            m_guess.setBackgroundColor(Color.GREEN);
-
-        won();
+        if (riddle.isMatch())
+            won();
     }
 
     private void won() {
