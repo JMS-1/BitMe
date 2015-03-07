@@ -19,7 +19,7 @@ public class AppStarter extends Activity {
         setContentView(R.layout.activity_app_starter);
 
         try {
-            InputStream reader = getAssets().open("intro.txt");
+            InputStream reader = getResources().openRawResource(R.raw.intro);
             try {
                 ByteArrayOutputStream string = new ByteArrayOutputStream();
                 try {
