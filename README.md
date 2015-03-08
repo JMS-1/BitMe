@@ -8,4 +8,4 @@ machen müssen. In dem kleinen Spiel werden 8 Bits einer Zahl durcheinandergewü
 in die richtige Reihenfolge gebracht werden - mit einem Hinweis auf die schnellstmögliche Art
 mit der minimalen Anzahl von Schritten.
 
-Das Ergebnis kann mal im Allgemeinen zeitnah von Google Play herunterladen: https://play.google.com/store/apps/details?id=net.psimarron.bitme.
+Den aktuellen Stand kann mal im Allgemeinen zeitnah von Google Play herunterladen: https://play.google.com/store/apps/details?id=net.psimarron.bitme - natürlich kostenlos.
