@@ -4,7 +4,7 @@
     android:background="@drawable/background"
     android:fillViewport="true">
 
-<RelativeLayout
+    <RelativeLayout
         android:id="@+id/game_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
