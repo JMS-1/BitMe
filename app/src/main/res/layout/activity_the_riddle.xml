@@ -10,6 +10,14 @@
         android:background="@color/game_background"
         android:padding="10dp">
 
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:onClick="onHelp"
+            android:src="@drawable/help" />
+
         <TextView
             android:id="@+id/view_guess"
             style="@android:style/TextAppearance.Large"

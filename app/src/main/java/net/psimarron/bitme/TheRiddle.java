@@ -2,6 +2,7 @@ package net.psimarron.bitme;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -283,5 +284,12 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    // Der Anwender möchte die Hilfeseite sehen.
+    public void onHelp(View starter) {
+        Intent intent = new Intent();
+        intent.setClass(this, HelpAndIntro.class);
+        startActivity(intent);
     }
 }

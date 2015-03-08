@@ -1,7 +1,6 @@
 package net.psimarron.bitme;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -11,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 // Auf der Startseite wird das Spiel kurz erklärt.
-public class AppStarter extends Activity {
+public class HelpAndIntro extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +43,5 @@ public class AppStarter extends Activity {
         } catch (IOException e) {
             // Das interessiert und im Moment noch nicht
         }
-    }
-
-    // Der Anwender möchte das Spiel nun starten.
-    public void onStart(View starter) {
-        // Wir erzeugen einen neuen Task und stellen insbesondere sicher, dass die Einführungsseite aus der Historie verschwindet
-        Intent intent = new Intent();
-        intent.setClass(this, TheRiddle.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
     }
 }
