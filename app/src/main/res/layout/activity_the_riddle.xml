@@ -1,9 +1,10 @@
 <net.psimarron.bitme.VerticalOnlyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background">
+    android:background="@drawable/background"
+    android:fillViewport="true">
 
-    <RelativeLayout
+<RelativeLayout
         android:id="@+id/game_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
