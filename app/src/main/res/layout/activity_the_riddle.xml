@@ -1,34 +1,35 @@
-<net.psimarron.bitme.VerticalOnlyScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
     android:fillViewport="true">
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/game_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
         android:background="@color/game_background"
-        android:padding="10dp">
+        android:orientation="vertical" />
 
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:onClick="onHelp"
-            android:src="@drawable/help" />
+    <TextView
+        android:id="@+id/view_guess"
+        style="@android:style/TextAppearance.Large"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="5dp"
+        android:background="@drawable/par_state"
+        android:gravity="center_horizontal|center_vertical" />
 
-        <TextView
-            android:id="@+id/view_guess"
-            style="@android:style/TextAppearance.Large"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="5dp"
-            android:background="@drawable/par_state"
-            android:gravity="center_horizontal|center_vertical" />
-    </RelativeLayout>
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:onClick="onHelp"
+        android:src="@drawable/help" />
 
-</net.psimarron.bitme.VerticalOnlyScrollView>
+</RelativeLayout>

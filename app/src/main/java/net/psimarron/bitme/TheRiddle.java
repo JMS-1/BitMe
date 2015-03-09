@@ -9,10 +9,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 // Das ist die Aktivität mit dem eigentlichen Spiel.
@@ -69,8 +69,8 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
 
         setContentView(content);
 
-        // Im Moment verwenden wir eine geschachtelte Darstellung zum Abblenden des Hintergrunds - TODO: vermutlich wöre das eher eine Aufgabe für ein LayerDrawable
-        RelativeLayout view = (RelativeLayout) content.findViewById(R.id.game_container);
+        // Im Moment verwenden wir eine geschachtelte Darstellung zum Abblenden des Hintergrunds - TODO: vermutlich wäre das eher eine Aufgabe für ein LayerDrawable
+        ViewGroup view = (ViewGroup) content.findViewById(R.id.game_container);
 
         // Die relevanten Oberflächenelemente
         m_guess = (TextView) findViewById(R.id.view_guess);
@@ -79,27 +79,16 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
         // Für jedes Bit wird dynamisch eine entsprechende Repräsentation erzeugt
         for (int i = 0; i < m_bits.length; i++) {
             // Am einfachsten geht das aus einer Vorlage - die zusätzliche Schachtelung erleichtert die Manipulation der LayoutParameter
-            RelativeLayout template = (RelativeLayout) inflater.inflate(R.layout.bit, null);
+            ViewGroup template = (ViewGroup) inflater.inflate(R.layout.bit, null);
             View bit = template.findViewById(R.id.bit_display);
-
             template.removeView(bit);
 
             // Die Anzeige des Bits vorbereiten
-            bit.setId(R.id.view_guess + 1 + i);
             bit.setTag(new Integer(i));
             bit.setOnTouchListener(this);
 
-            // Nun noch die Anordnung der Bits geeignet konfigurieren
-            RelativeLayout.LayoutParams layout = (RelativeLayout.LayoutParams) bit.getLayoutParams();
-
-            layout.addRule(RelativeLayout.CENTER_HORIZONTAL);
-            if (i == m_bits.length - 1)
-                layout.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-            else
-                layout.addRule(RelativeLayout.BELOW, bit.getId() + 1);
-
             // Und dann merken wir uns die Präsentation und schalten die Anzeige frei
-            view.addView(m_bits[i] = bit);
+            view.addView(m_bits[i] = bit, 0);
         }
 
         // Zeit für das erste Rätsel
