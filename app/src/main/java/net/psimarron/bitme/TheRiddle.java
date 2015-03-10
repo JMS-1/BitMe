@@ -50,7 +50,7 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
 
     // Erstellt ein neues Rätsel.
     private void newRiddle() {
-        m_currentRiddle = new Riddle(this);
+        m_currentRiddle = new Riddle(m_bits.length, this);
 
         // Wir passen auch die Überschrift entsprechend an
         setTitle(getResources().getString(R.string.app_title, m_currentRiddle.Goal));
@@ -74,7 +74,7 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
 
         // Die relevanten Oberflächenelemente
         m_guess = (TextView) findViewById(R.id.view_guess);
-        m_bits = new View[Riddle.NUMBER_OF_BITS];
+        m_bits = new View[8];
 
         // Für jedes Bit wird dynamisch eine entsprechende Repräsentation erzeugt
         for (int i = 0; i < m_bits.length; i++) {

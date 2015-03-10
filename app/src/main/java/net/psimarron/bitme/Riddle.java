@@ -4,12 +4,10 @@ import java.util.Random;
 
 // Eine Instanz dieser Klasse beschreibt ein einzelnes Rätsel.
 public class Riddle {
-    // 8 Bits reichen erst einmal - es soll ja für Anfänger sein und wenn man das Prinzip verstanden hat, ist es eh egal.
-    public static final int NUMBER_OF_BITS = 8;
-
     // Stellt Zufallszahlen bereit.
     private final static Random s_generator = new Random();
-
+    // 8 Bits reichen erst einmal - es soll ja für Anfänger sein und wenn man das Prinzip verstanden hat, ist es eh egal.
+    public final int NumberOfBits;
     // Die zu ratende Zahl.
     public final int Goal;
 
@@ -29,16 +27,18 @@ public class Riddle {
     private int m_tries;
 
     // Erstellt ein neues Rätsel.
-    public Riddle(ChangeListener listener) {
+    public Riddle(int numberOfBits, ChangeListener listener) {
+        NumberOfBits = numberOfBits;
+
         // Irgend eine Zahl, nur nicht alles 0 oder alles 1, sonst gibt es keinen abweichenden Anfangsratewert
-        Goal = 1 + s_generator.nextInt((1 << NUMBER_OF_BITS) - 2);
+        Goal = 1 + s_generator.nextInt((1 << NumberOfBits) - 2);
 
         // Das ist auch der erste Rateversuch
         m_guess = Goal;
 
         // Und dann würfeln wir das ordentlich durcheinander
-        for (int n = NUMBER_OF_BITS * 2; n-- > 0; ) {
-            int i = s_generator.nextInt(NUMBER_OF_BITS - 1);
+        for (int n = NumberOfBits * 2; n-- > 0; ) {
+            int i = s_generator.nextInt(NumberOfBits - 1);
 
             // Naja, einfach ein paar Mal Bits vertauschen
             swap(i, i + 1);
@@ -60,10 +60,10 @@ public class Riddle {
     }
 
     // Verschiebt eine einzelne Bitposition.
-    public static int move(int number, int i) {
+    public int move(int number, int i) {
         if (i < 0)
             throw new IllegalArgumentException("i");
-        if (i >= NUMBER_OF_BITS)
+        if (i >= NumberOfBits)
             throw new IllegalArgumentException("i");
 
         // So war es vorher
@@ -76,7 +76,7 @@ public class Riddle {
         int left = guess >> (i + 1);
 
         // Das bauen wir dann um in <gewählte Position> <unberührter linker Teil> <inberührter rechter Teil>
-        return (bit << (NUMBER_OF_BITS - 1)) | (left << i) | right;
+        return (bit << (NumberOfBits - 1)) | (left << i) | right;
     }
 
     // Der Spieler hat eine Bitposition ausgewählt, die dann entfernt und deren Wert ganz nach oben gesetzt wird.
@@ -103,7 +103,7 @@ public class Riddle {
     public boolean get(int i) {
         if (i < 0)
             throw new IllegalArgumentException("i");
-        if (i >= NUMBER_OF_BITS)
+        if (i >= NumberOfBits)
             throw new IllegalArgumentException("i");
 
         return (m_guess & (1 << i)) != 0;
