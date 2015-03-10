@@ -16,7 +16,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 // Das ist die Aktivität mit dem eigentlichen Spiel.
-public class TheRiddle extends Activity implements Riddle.ChangeListener, View.OnTouchListener {
+public class TheRiddle extends Activity implements View.OnTouchListener {
 
     // Die Weite der horizontalen Verschiebung des ausgewählten Bits.
     private final int ANIMATION_OFFSET = 200;
@@ -25,7 +25,7 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
     private final int ANIMATION_TIME_FLING = 200;
 
     // Die Startverzögerung in Millisekunden für den Beginn des freien Falls.
-    private final int ANIMATION_TIME_FALL_OFFSET = ANIMATION_TIME_FLING / 2;
+    private final int ANIMATION_TIME_FALL_OFFSET = ANIMATION_TIME_FLING / 4;
 
     // Die Startverzögerung in Millisekunden zwischen dem Fall der einzelnen Bits.
     private final int ANIMATION_TIME_FALL_DELAY = ANIMATION_TIME_FALL_OFFSET;
@@ -50,13 +50,16 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
 
     // Erstellt ein neues Rätsel.
     private void newRiddle() {
-        m_currentRiddle = new Riddle(m_bits.length, this);
+        m_currentRiddle = new Riddle(m_bits.length);
 
         // Wir passen auch die Überschrift entsprechend an
         setTitle(getResources().getString(R.string.app_title, m_currentRiddle.Goal));
 
         // Und den Hinweis auf die minimal benötigte Anzahl von Verschiebungen
         m_guess.setText(Integer.toString(m_currentRiddle.Par));
+
+        // Bits zeichnen
+        refresh();
     }
 
     @Override
@@ -84,7 +87,6 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
             template.removeView(bit);
 
             // Die Anzeige des Bits vorbereiten
-            bit.setTag(new Integer(i));
             bit.setOnTouchListener(this);
 
             // Und dann merken wir uns die Präsentation und schalten die Anzeige frei
@@ -95,22 +97,17 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
         newRiddle();
     }
 
-    @Override
-    public void onGuessChanged(Riddle riddle) {
+    private void refresh() {
         // Die Präsentation wird auf Basis der Daten neu angepasst
-        for (int i = 0; i < m_bits.length; i++) {
-            View bit = m_bits[i];
-            Integer index = (Integer) bit.getTag();
-
-            bit.setActivated(riddle.get(index));
-        }
+        for (int index = 0; index < m_bits.length; index++)
+            m_bits[index].setActivated(m_currentRiddle.get(index));
 
         // Dieses Feedback ist vor allem zu Ende des Spiels relevant
-        m_guess.setActivated(riddle.isMatch());
-        m_guess.setSelected(riddle.getTries() <= riddle.Par);
+        m_guess.setActivated(m_currentRiddle.isMatch());
+        m_guess.setSelected(m_currentRiddle.getTries() <= m_currentRiddle.Par);
 
         // Das Spiel ist zu Ende, wenn die gewünschte Zahl hergestellt wurde
-        if (riddle.isMatch())
+        if (m_currentRiddle.isMatch())
             won();
     }
 
@@ -129,32 +126,34 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
         if (m_currentAnimation >= 0)
             return false;
 
-        int action = event.getAction();
+        // Suchen wir mal das Bit
+        for (int index = 0; index < m_bits.length; index++)
+            if (m_bits[index] == v) {
+                int action = event.getAction();
 
-        // Zu Beginn einer Geste merken wir uns die horizontale Position
-        if (action == MotionEvent.ACTION_DOWN) {
-            m_touchStart = event.getX();
-            return true;
-        }
+                // Zu Beginn einer Geste merken wir uns die horizontale Position
+                if (action == MotionEvent.ACTION_DOWN) {
+                    m_touchStart = event.getX();
+                    return true;
+                }
 
-        // Ansonsten interessiert nur das Ende der Geste
-        if (action != MotionEvent.ACTION_UP)
-            return false;
+                // Ansonsten interessiert nur das Ende der Geste
+                if (action != MotionEvent.ACTION_UP)
+                    return false;
 
-        // Jedes Bitelement enthält die laufenden Nummer des angezeigten Bits
-        Integer index = (Integer) v.getTag();
-        if (index == null)
-            return false;
+                // Wir reagieren erst ab einem willkürlich gewählten Mindestenabstand
+                float moveX = event.getX() - m_touchStart;
+                if (Math.abs(moveX) < 100)
+                    return false;
 
-        // Wir reagieren erst ab einem willkürlich gewählten Mindestenabstand
-        float moveX = event.getX() - m_touchStart;
-        if (Math.abs(moveX) < 100)
-            return false;
+                // Feedback für den Anwender starten
+                startAnimation(index, moveX < 0);
 
-        // Feedback für den Anwender starten
-        startAnimation(index, moveX < 0);
+                return true;
+            }
 
-        return true;
+        // Das ist keins von unseren Bits
+        return false;
     }
 
     // Beginnt mit der Animation als Feedback für den Anwender.
@@ -237,10 +236,13 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
 
                 // Alle Präsentationen werden an den korrekten Platz geschoben
                 for (int i = index; i < m_bits.length; i++)
-                    m_bits[i].clearAnimation();
+                    m_bits[i].setAnimation(null);
 
                 // Die Bitvertauschung werden vorgenommen
                 m_currentRiddle.move(index);
+
+                // Neu zeichnen
+                refresh();
             }
 
             @Override
@@ -270,6 +272,9 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
             case R.id.action_reset:
                 // Mit der selben Zahl und der selben Anordnung der Bits starten
                 m_currentRiddle.restart();
+
+                // Neu zeichnen
+                refresh();
                 return true;
         }
 

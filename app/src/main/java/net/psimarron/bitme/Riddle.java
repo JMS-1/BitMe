@@ -6,16 +6,15 @@ import java.util.Random;
 public class Riddle {
     // Stellt Zufallszahlen bereit.
     private final static Random s_generator = new Random();
+
     // 8 Bits reichen erst einmal - es soll ja für Anfänger sein und wenn man das Prinzip verstanden hat, ist es eh egal.
     public final int NumberOfBits;
+
     // Die zu ratende Zahl.
     public final int Goal;
 
     // Die minimale Anzahl von Verschiebungen.
     public final int Par;
-
-    // Informiert über Änderungen.
-    private final ChangeListener m_listener;
 
     // Der erste Rateversuch.
     private final int m_firstGuess;
@@ -27,7 +26,7 @@ public class Riddle {
     private int m_tries;
 
     // Erstellt ein neues Rätsel.
-    public Riddle(int numberOfBits, ChangeListener listener) {
+    public Riddle(int numberOfBits) {
         NumberOfBits = numberOfBits;
 
         // Irgend eine Zahl, nur nicht alles 0 oder alles 1, sonst gibt es keinen abweichenden Anfangsratewert
@@ -52,11 +51,7 @@ public class Riddle {
         Par = RiddleAnalyser.getPar(this);
 
         // Anfangsstand merken
-        m_listener = listener;
         m_firstGuess = m_guess;
-
-        // Und melden
-        onGuessChanged();
     }
 
     // Verschiebt eine einzelne Bitposition.
@@ -87,16 +82,6 @@ public class Riddle {
         // So ist es nachher - wir zählen auch die Versuche
         m_guess = move(guess, i);
         m_tries++;
-
-        // Nur wenn sich etwas verändert hat müssen wir auch die Anzeige erneuern
-        if (guess != m_guess)
-            onGuessChanged();
-    }
-
-    // Meldet eine Veränderung am Ratestand
-    private void onGuessChanged() {
-        if (m_listener != null)
-            m_listener.onGuessChanged(this);
     }
 
     // Meldet ein Bit des aktuell geratenden Wertes.
@@ -139,21 +124,7 @@ public class Riddle {
     // Das selbe Rätsel von vorne.
     public void restart() {
         // Zurücksetzen
-        m_tries = 0;
-
-        // Hm, da sind wir aber schon
-        if (m_guess == m_firstGuess)
-            return;
-
-        // Zurücksetzen
         m_guess = m_firstGuess;
-
-        // Und melden
-        onGuessChanged();
-    }
-
-    // Über diese Schnittstelle erfolgen alle Benachrichtigungen.
-    public interface ChangeListener {
-        void onGuessChanged(Riddle riddle);
+        m_tries = 0;
     }
 }
