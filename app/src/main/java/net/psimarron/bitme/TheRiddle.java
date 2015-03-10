@@ -234,11 +234,11 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
 
                 m_currentAnimation = -1;
 
-                // Alle Präsentationen werden nun an den korrekten Platz geschoben
+                // Alle Präsentationen werden an den korrekten Platz geschoben
                 for (int i = index; i < m_bits.length; i++)
                     m_bits[i].clearAnimation();
 
-                // Und schließlich die Bitvertauschung vorgenommen
+                // Die Bitvertauschung werden vorgenommen
                 m_currentRiddle.move(index);
             }
 
