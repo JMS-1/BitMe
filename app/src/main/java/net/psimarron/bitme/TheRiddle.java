@@ -218,6 +218,7 @@ public class TheRiddle extends Activity implements Riddle.ChangeListener, View.O
         bitAnimation.addAnimation(flingIn);
         flingIn.setStartOffset(endOfTimeline);
         flingIn.setDuration(flingOut.getDuration());
+        flingIn.setFillAfter(true);
 
         // Alles zusammen vorbereiten
         allBitAnimation.start();

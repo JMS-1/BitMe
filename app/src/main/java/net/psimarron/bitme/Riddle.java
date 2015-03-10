@@ -138,13 +138,15 @@ public class Riddle {
 
     // Das selbe Rätsel von vorne.
     public void restart() {
+        // Zurücksetzen
+        m_tries = 0;
+
         // Hm, da sind wir aber schon
         if (m_guess == m_firstGuess)
             return;
 
         // Zurücksetzen
         m_guess = m_firstGuess;
-        m_tries = 0;
 
         // Und melden
         onGuessChanged();
