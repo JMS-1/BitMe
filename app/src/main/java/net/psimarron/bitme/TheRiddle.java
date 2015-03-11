@@ -18,6 +18,9 @@ import android.widget.TextView;
 // Das ist die Aktivität mit dem eigentlichen Spiel.
 public class TheRiddle extends Activity implements View.OnTouchListener {
 
+    // Der Name der Ablage für die Anzahl der Bits.
+    private final String STATE_NUMBER_OF_BITS = "numberOfBits";
+
     // Die Weite der horizontalen Verschiebung des ausgewählten Bits.
     private final int ANIMATION_OFFSET = 200;
 
@@ -49,28 +52,22 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
     private int m_currentAnimation = -1;
 
     // Die Anzahl der Bits und damit die Spielstärke.
-    private int m_numberOfBits = 8;
+    private int m_numberOfBits = -1;
 
     // Hier leben und sterben die kleinen Bits.
     private ViewGroup m_bitContainer;
 
-    // Erstellt ein neues Rätsel.
-    private void newRiddle() {
-        m_currentRiddle = new Riddle(m_numberOfBits);
-
-        // Wir passen auch die Überschrift entsprechend an
-        setTitle(getResources().getString(R.string.app_title, m_currentRiddle.Goal));
-
-        // Und den Hinweis auf die minimal benötigte Anzahl von Verschiebungen
-        m_guess.setText(Integer.toString(m_currentRiddle.Par));
-
-        // Bits zeichnen
-        refresh();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Eventuell alles rekonstruieren oder einfach nur die Defaultwerte laden
+        if (savedInstanceState == null)
+            savedInstanceState = new Bundle();
+
+        // Gemeinsamer Code für beide Varianten
+        m_numberOfBits = savedInstanceState.getInt(STATE_NUMBER_OF_BITS, 8);
+        m_currentRiddle = new Riddle(m_numberOfBits);
 
         // Die äußere visuelle Darstellung
         LayoutInflater inflater = getLayoutInflater();
@@ -99,11 +96,17 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
             m_bitContainer.addView(m_bits[i] = bit, 0);
         }
 
-        // Zeit für das erste Rätsel
-        newRiddle();
+        // Initiales zeichnen
+        refresh();
     }
 
     private void refresh() {
+        // Wir passen auch die Überschrift entsprechend an
+        setTitle(getResources().getString(R.string.app_title, m_currentRiddle.Goal));
+
+        // Und den Hinweis auf die minimal benötigte Anzahl von Verschiebungen
+        m_guess.setText(Integer.toString(m_currentRiddle.Par));
+
         // Die Präsentation wird auf Basis der Daten neu angepasst
         for (int index = 0; index < m_bits.length; index++)
             m_bits[index].setActivated(m_currentRiddle.get(index));
@@ -236,19 +239,12 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                int index = m_currentAnimation;
-
-                m_currentAnimation = -1;
-
-                // Alle Präsentationen werden an den korrekten Platz geschoben
-                for (int i = index; i < m_bits.length; i++)
-                    m_bits[i].setAnimation(null);
-
-                // Die Bitvertauschung werden vorgenommen
-                m_currentRiddle.move(index);
-
-                // Neu zeichnen
-                refresh();
+                m_bitContainer.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        finishAnimation();
+                    }
+                }, 10);
             }
 
             @Override
@@ -259,6 +255,22 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
         // Die Animationen den visuellen Elementen zuordnen und loslaufen lassen
         for (int i = index; i < m_bits.length; i++)
             m_bits[i].startAnimation(m_bits[i].getAnimation());
+    }
+
+    private void finishAnimation() {
+        int index = m_currentAnimation;
+
+        m_currentAnimation = -1;
+
+        // Alle Präsentationen werden an den korrekten Platz geschoben
+        for (int i = index; i < m_bits.length; i++)
+            m_bits[i].setAnimation(null);
+
+        // Die Bitvertauschung werden vorgenommen
+        m_currentRiddle.move(index);
+
+        // Neu zeichnen
+        refresh();
     }
 
     @Override
@@ -273,18 +285,19 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
         switch (item.getItemId()) {
             case R.id.action_new:
                 // Mit neuer Zahl starten
-                newRiddle();
-                return true;
+                m_currentRiddle = new Riddle(m_numberOfBits);
+                break;
             case R.id.action_reset:
                 // Mit der selben Zahl und der selben Anordnung der Bits starten
                 m_currentRiddle.restart();
-
-                // Neu zeichnen
-                refresh();
-                return true;
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
+        // Neu zeichnen
+        refresh();
+        return true;
     }
 
     // Der Anwender möchte die Hilfeseite sehen.
@@ -292,5 +305,12 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
         Intent intent = new Intent();
         intent.setClass(this, HelpAndIntro.class);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(STATE_NUMBER_OF_BITS, m_numberOfBits);
     }
 }
