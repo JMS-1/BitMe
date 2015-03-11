@@ -48,9 +48,15 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
     // Enthält die Position des aktuell animierten Bits.
     private int m_currentAnimation = -1;
 
+    // Die Anzahl der Bits und damit die Spielstärke.
+    private int m_numberOfBits = 8;
+
+    // Hier leben und sterben die kleinen Bits.
+    private ViewGroup m_bitContainer;
+
     // Erstellt ein neues Rätsel.
     private void newRiddle() {
-        m_currentRiddle = new Riddle(m_bits.length);
+        m_currentRiddle = new Riddle(m_numberOfBits);
 
         // Wir passen auch die Überschrift entsprechend an
         setTitle(getResources().getString(R.string.app_title, m_currentRiddle.Goal));
@@ -73,11 +79,11 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
         setContentView(content);
 
         // Im Moment verwenden wir eine geschachtelte Darstellung zum Abblenden des Hintergrunds - TODO: vermutlich wäre das eher eine Aufgabe für ein LayerDrawable
-        ViewGroup view = (ViewGroup) content.findViewById(R.id.game_container);
+        m_bitContainer = (ViewGroup) content.findViewById(R.id.game_container);
 
         // Die relevanten Oberflächenelemente
         m_guess = (TextView) findViewById(R.id.view_guess);
-        m_bits = new View[8];
+        m_bits = new View[m_numberOfBits];
 
         // Für jedes Bit wird dynamisch eine entsprechende Repräsentation erzeugt
         for (int i = 0; i < m_bits.length; i++) {
@@ -90,7 +96,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
             bit.setOnTouchListener(this);
 
             // Und dann merken wir uns die Präsentation und schalten die Anzeige frei
-            view.addView(m_bits[i] = bit, 0);
+            m_bitContainer.addView(m_bits[i] = bit, 0);
         }
 
         // Zeit für das erste Rätsel
@@ -166,6 +172,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
         // Wir kümmern uns erst einmal um das vom Anwender bewegte Bit
         AnimationSet bitAnimation = new AnimationSet(true);
         allBitAnimation.addAnimation(bitAnimation);
+        bitAnimation.setFillAfter(true);
         m_bits[index].setAnimation(bitAnimation);
 
         // Der Bewegung der Geste folgen und aus der Reihe ausscheren
@@ -217,7 +224,6 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
         bitAnimation.addAnimation(flingIn);
         flingIn.setStartOffset(endOfTimeline);
         flingIn.setDuration(flingOut.getDuration());
-        flingIn.setFillAfter(true);
 
         // Alles zusammen vorbereiten
         allBitAnimation.start();
