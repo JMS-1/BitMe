@@ -1,21 +1,29 @@
 package net.psimarron.bitme;
 
+import android.os.Bundle;
+
 import java.util.Random;
 
 // Eine Instanz dieser Klasse beschreibt ein einzelnes Rätsel.
 public class Riddle {
     // Stellt Zufallszahlen bereit.
     private final static Random s_generator = new Random();
-
     // 8 Bits reichen erst einmal - es soll ja für Anfänger sein und wenn man das Prinzip verstanden hat, ist es eh egal.
     public final int NumberOfBits;
-
     // Die zu ratende Zahl.
     public final int Goal;
-
     // Die minimale Anzahl von Verschiebungen.
     public final int Par;
-
+    // Der Name der Ablage für die Anzahl der Bits.
+    private final String STATE_NUMBER_OF_BITS = "numberOfBits";
+    // Der Name der Ablage für die Zielzahl.
+    private final String STATE_GOAL = "goal";
+    // Der Name der Ablage für den aktuellen Rateversuch.
+    private final String STATE_CURRENT = "guess";
+    // Der Name der Ablage für den ersten Rateversuch.
+    private final String STATE_FIRST = "firstGuess";
+    // Der Name der Ablage für die berits vorgenommenen Vertauschungen.
+    private final String STATE_TRIES = "tries";
     // Der erste Rateversuch.
     private final int m_firstGuess;
 
@@ -26,32 +34,53 @@ public class Riddle {
     private int m_tries;
 
     // Erstellt ein neues Rätsel.
-    public Riddle(int numberOfBits) {
-        NumberOfBits = numberOfBits;
+    public Riddle(int numberOfBits, Bundle bundle) {
+        if (bundle == null) {
+            // Alles neu
+            NumberOfBits = numberOfBits;
 
-        // Irgend eine Zahl, nur nicht alles 0 oder alles 1, sonst gibt es keinen abweichenden Anfangsratewert
-        Goal = 1 + s_generator.nextInt((1 << NumberOfBits) - 2);
+            // Irgend eine Zahl, nur nicht alles 0 oder alles 1, sonst gibt es keinen abweichenden Anfangsratewert
+            Goal = 1 + s_generator.nextInt((1 << NumberOfBits) - 2);
 
-        // Das ist auch der erste Rateversuch
-        m_guess = Goal;
+            // Das ist auch der erste Rateversuch
+            m_guess = Goal;
 
-        // Und dann würfeln wir das ordentlich durcheinander
-        for (int n = NumberOfBits * 2; n-- > 0; ) {
-            int i = s_generator.nextInt(NumberOfBits - 1);
+            // Und dann würfeln wir das ordentlich durcheinander
+            for (int n = NumberOfBits * 2; n-- > 0; ) {
+                int i = s_generator.nextInt(NumberOfBits - 1);
 
-            // Naja, einfach ein paar Mal Bits vertauschen
-            swap(i, i + 1);
+                // Naja, einfach ein paar Mal Bits vertauschen
+                swap(i, i + 1);
+            }
+
+            // Wenn es jetzt schon passt müssen wir korrigieren ansonsten
+            if (isMatch())
+                move(0);
+        } else {
+            // Rekonstruieren
+            NumberOfBits = bundle.getInt(STATE_NUMBER_OF_BITS);
+            m_guess = bundle.getInt(STATE_CURRENT);
+            m_tries = bundle.getInt(STATE_TRIES);
+            Goal = bundle.getInt(STATE_GOAL);
         }
-
-        // Wenn es jetzt schon passt müssen wir korrigieren ansonsten
-        if (isMatch())
-            move(0);
 
         // Minimale Anzahl von Versuchen ermitteln
         Par = RiddleAnalyser.getPar(this);
 
         // Anfangsstand merken
-        m_firstGuess = m_guess;
+        if (bundle == null)
+            m_firstGuess = m_guess;
+        else
+            m_firstGuess = bundle.getInt(STATE_FIRST);
+    }
+
+    // Überträgt dieses Rätsel in die Ablage.
+    public void save(Bundle bundle) {
+        bundle.putInt(STATE_NUMBER_OF_BITS, NumberOfBits);
+        bundle.putInt(STATE_FIRST, m_firstGuess);
+        bundle.putInt(STATE_CURRENT, m_guess);
+        bundle.putInt(STATE_TRIES, m_tries);
+        bundle.putInt(STATE_GOAL, Goal);
     }
 
     // Verschiebt eine einzelne Bitposition.

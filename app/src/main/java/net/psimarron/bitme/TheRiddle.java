@@ -18,9 +18,6 @@ import android.widget.TextView;
 // Das ist die Aktivität mit dem eigentlichen Spiel.
 public class TheRiddle extends Activity implements View.OnTouchListener {
 
-    // Der Name der Ablage für die Anzahl der Bits.
-    private final String STATE_NUMBER_OF_BITS = "numberOfBits";
-
     // Die Weite der horizontalen Verschiebung des ausgewählten Bits.
     private final int ANIMATION_OFFSET = 200;
 
@@ -61,13 +58,9 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Eventuell alles rekonstruieren oder einfach nur die Defaultwerte laden
-        if (savedInstanceState == null)
-            savedInstanceState = new Bundle();
-
-        // Gemeinsamer Code für beide Varianten
-        m_numberOfBits = savedInstanceState.getInt(STATE_NUMBER_OF_BITS, 8);
-        m_currentRiddle = new Riddle(m_numberOfBits);
+        // Neu erzeugen oder rekonstruieren
+        m_currentRiddle = new Riddle(8, savedInstanceState);
+        m_numberOfBits = m_currentRiddle.NumberOfBits;
 
         // Die äußere visuelle Darstellung
         LayoutInflater inflater = getLayoutInflater();
@@ -258,19 +251,18 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
     }
 
     private void finishAnimation() {
-        int index = m_currentAnimation;
-
-        m_currentAnimation = -1;
-
         // Alle Präsentationen werden an den korrekten Platz geschoben
-        for (int i = index; i < m_bits.length; i++)
+        for (int i = m_currentAnimation; i < m_bits.length; i++)
             m_bits[i].setAnimation(null);
 
         // Die Bitvertauschung werden vorgenommen
-        m_currentRiddle.move(index);
+        m_currentRiddle.move(m_currentAnimation);
 
         // Neu zeichnen
         refresh();
+
+        // Von nun an können wir neu anordnen
+        m_currentAnimation = -1;
     }
 
     @Override
@@ -285,7 +277,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
         switch (item.getItemId()) {
             case R.id.action_new:
                 // Mit neuer Zahl starten
-                m_currentRiddle = new Riddle(m_numberOfBits);
+                m_currentRiddle = new Riddle(m_numberOfBits, null);
                 break;
             case R.id.action_reset:
                 // Mit der selben Zahl und der selben Anordnung der Bits starten
@@ -311,6 +303,6 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt(STATE_NUMBER_OF_BITS, m_numberOfBits);
+        m_currentRiddle.save(outState);
     }
 }
