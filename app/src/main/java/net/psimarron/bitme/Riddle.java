@@ -8,22 +8,31 @@ import java.util.Random;
 public class Riddle {
     // Stellt Zufallszahlen bereit.
     private final static Random s_generator = new Random();
+
     // 8 Bits reichen erst einmal - es soll ja für Anfänger sein und wenn man das Prinzip verstanden hat, ist es eh egal.
     public final int NumberOfBits;
+
     // Die zu ratende Zahl.
     public final int Goal;
+
     // Die minimale Anzahl von Verschiebungen.
     public final int Par;
+
     // Der Name der Ablage für die Anzahl der Bits.
     private final String STATE_NUMBER_OF_BITS = "numberOfBits";
+
     // Der Name der Ablage für die Zielzahl.
     private final String STATE_GOAL = "goal";
+
     // Der Name der Ablage für den aktuellen Rateversuch.
     private final String STATE_CURRENT = "guess";
+
     // Der Name der Ablage für den ersten Rateversuch.
     private final String STATE_FIRST = "firstGuess";
+
     // Der Name der Ablage für die berits vorgenommenen Vertauschungen.
     private final String STATE_TRIES = "tries";
+
     // Der erste Rateversuch.
     private final int m_firstGuess;
 
@@ -56,6 +65,9 @@ public class Riddle {
             // Wenn es jetzt schon passt müssen wir korrigieren ansonsten
             if (isMatch())
                 move(0);
+
+            // Das ist der Anfangswert und die Zahl der Versuche ist immer 0
+            m_tries = 0;
         } else {
             // Rekonstruieren
             NumberOfBits = bundle.getInt(STATE_NUMBER_OF_BITS);
@@ -105,11 +117,7 @@ public class Riddle {
 
     // Der Spieler hat eine Bitposition ausgewählt, die dann entfernt und deren Wert ganz nach oben gesetzt wird.
     public void move(int i) {
-        // So war es vorher
-        int guess = m_guess;
-
-        // So ist es nachher - wir zählen auch die Versuche
-        m_guess = move(guess, i);
+        m_guess = move(m_guess, i);
         m_tries++;
     }
 
