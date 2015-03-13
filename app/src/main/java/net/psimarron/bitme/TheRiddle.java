@@ -16,7 +16,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 // Das ist die Aktivität mit dem eigentlichen Spiel.
-public class TheRiddle extends Activity implements View.OnTouchListener {
+public class TheRiddle extends Activity implements View.OnTouchListener, Animation.AnimationListener {
 
     // Die Weite der horizontalen Verschiebung des ausgewählten Bits.
     private final int ANIMATION_OFFSET = 200;
@@ -53,6 +53,9 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
 
     // Hier leben und sterben die kleinen Bits.
     private ViewGroup m_bitContainer;
+
+    // Die Anzahl der Animationen, die noch abgewartet werden müssen.
+    private int m_pendingAnimations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,6 +201,9 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
                 fall.setFillAfter(true);
                 m_bits[i].setAnimation(fall);
 
+                // Auf das Ende dieser Animation wollen wir warten
+                registerAnimation(fall);
+
                 // Zeit korrigieren
                 endOfTimeline += fall.getDuration();
             }
@@ -221,29 +227,11 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
         flingIn.setStartOffset(endOfTimeline);
         flingIn.setDuration(flingOut.getDuration());
 
+        // Auf das Ende dieser Animation wollen wir auch warten
+        registerAnimation(flingIn);
+
         // Alles zusammen vorbereiten
         allBitAnimation.start();
-
-        // Auf das Ende warten
-        flingIn.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                m_bitContainer.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        finishAnimation();
-                    }
-                }, 10);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
-        });
 
         // Die Animationen den visuellen Elementen zuordnen und loslaufen lassen
         for (int i = index; i < m_bits.length; i++)
@@ -253,7 +241,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
     private void finishAnimation() {
         // Alle Präsentationen werden an den korrekten Platz geschoben
         for (int i = m_currentAnimation; i < m_bits.length; i++)
-            m_bits[i].setAnimation(null);
+            m_bits[i].clearAnimation();
 
         // Die Bitvertauschung werden vorgenommen
         m_currentRiddle.move(m_currentAnimation);
@@ -274,6 +262,11 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // Solange die letzte Aktion nicht vollständig abgeschlossen ist, machen wir gar nichts
+        if (m_currentAnimation >= 0)
+            return super.onOptionsItemSelected(item);
+
+        // Mal schauen, was der Anwender von uns will
         switch (item.getItemId()) {
             case R.id.action_new:
                 // Mit neuer Zahl starten
@@ -304,5 +297,41 @@ public class TheRiddle extends Activity implements View.OnTouchListener {
         super.onSaveInstanceState(outState);
 
         m_currentRiddle.save(outState);
+    }
+
+    // Meldet eine zu überwachende Animation an.
+    private void registerAnimation(Animation animation) {
+        if (animation == null)
+            return;
+
+        m_pendingAnimations++;
+
+        animation.setAnimationListener(this);
+    }
+
+    @Override
+    public void onAnimationStart(Animation animation) {
+    }
+
+
+    @Override
+    public void onAnimationRepeat(Animation animation) {
+    }
+
+    @Override
+    public void onAnimationEnd(Animation animation) {
+        // Wir reagieren nur, wenn alle Animationen abgeschlossen sind
+        if (m_pendingAnimations < 1)
+            return;
+        if (m_pendingAnimations-- > 1)
+            return;
+
+        // Wir warten noch einen kleinen Moment bis wir Änderungen an der Oberfläche vornehmen
+        m_bitContainer.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                finishAnimation();
+            }
+        }, 10);
     }
 }
