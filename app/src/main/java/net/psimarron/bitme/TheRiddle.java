@@ -326,6 +326,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
         Intent intent = new Intent();
         intent.setClass(this, HelpAndIntro.class);
         intent.putExtra(HelpAndIntro.EXTRA_NUMBER_OF_BITS, m_numberOfBits);
+        startActivity(intent);
     }
 
     @Override
