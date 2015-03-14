@@ -11,6 +11,8 @@ import java.io.InputStream;
 
 // Auf der Startseite wird das Spiel kurz erklärt.
 public class HelpAndIntro extends Activity {
+    // Beim Aufruf der Parameter mit der Anzahl der Bits.
+    public static final String EXTRA_NUMBER_OF_BITS = "numberOfBits";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +35,10 @@ public class HelpAndIntro extends Activity {
                         string.write(buffer, 0, n);
 
                     TextView intro = (TextView) view.findViewById(R.id.intro);
-                    intro.setText(string.toString("UTF-8"));
+                    String introText = string.toString("UTF-8");
+                    int numberOfBits = getIntent().getIntExtra(EXTRA_NUMBER_OF_BITS, -1);
+
+                    intro.setText(introText.replace("$$MAX$$", Integer.toString((1 << numberOfBits) - 2)));
                 } finally {
                     string.close();
                 }
