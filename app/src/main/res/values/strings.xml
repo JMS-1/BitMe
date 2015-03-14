@@ -7,6 +7,7 @@
     <string name="won_close">Ich freue mich</string>
     <string name="start">Das will ich probieren</string>
 
+    <string name="pref_strength_key">NumberOfBits</string>
     <string name="pref_strength">Spielstärke</string>
     <string name="pref_strength_title">Spielstärke auswählen</string>
 
