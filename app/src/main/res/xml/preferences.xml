@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:defaultValue="A"
+        android:dialogTitle="@string/pref_strength_title"
+        android:entries="@array/pref_strength_entries"
+        android:entryValues="@array/pref_strength_values"
+        android:key="pref_bit_level"
+        android:title="@string/pref_strength" />
+
+</PreferenceScreen>

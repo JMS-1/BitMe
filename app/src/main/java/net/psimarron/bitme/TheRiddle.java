@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -60,6 +61,9 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Einstellungen definieren
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         // Neu erzeugen oder rekonstruieren
         m_currentRiddle = new Riddle(8, savedInstanceState);
@@ -276,6 +280,12 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
                 // Mit der selben Zahl und der selben Anordnung der Bits starten
                 m_currentRiddle.restart();
                 break;
+            case R.id.action_settings:
+                Intent intent = new Intent();
+                intent.setClass(this, SettingsActivity.class);
+                startActivity(intent);
+
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

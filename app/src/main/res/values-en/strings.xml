@@ -6,4 +6,9 @@
     <string name="won">Good job, you did it.</string>
     <string name="won_close">Let me be happy</string>
     <string name="start">Let me try it</string>
+
+    <string name="pref_strength">Level</string>
+    <string name="pref_strength_title">Select Level</string>
+
+    <string name="title_settings">Settings</string>
 </resources>
