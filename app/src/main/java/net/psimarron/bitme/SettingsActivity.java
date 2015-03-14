@@ -9,6 +9,9 @@ public class SettingsActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Gehen wir erst einmal davon aus, dass nichts verändert wurde
+        setResult(RESULT_CANCELED);
+
         // Unsere eigene Konfigurationselemente eintragen
         getFragmentManager()
                 .beginTransaction()

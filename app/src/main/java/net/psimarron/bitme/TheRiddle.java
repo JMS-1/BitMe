@@ -34,6 +34,9 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
     // Die Fallzeit in Millisekunden für jedes einzelne Bit.
     private final int ANIMATION_TIME_FALL = 4 * ANIMATION_TIME_FLING - 2 * (ANIMATION_TIME_FALL_OFFSET + ANIMATION_TIME_FALL_DELAY);
 
+    // Das Ergebnis der Änderung der Einstellungen.
+    private final int SETTINGS_RESULT = 1;
+
     // Das aktuelle Rätsel.
     private Riddle m_currentRiddle;
 
@@ -65,8 +68,13 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
         // Einstellungen definieren
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
+        // Aufbauen
+        initialize(savedInstanceState);
+    }
+
+    private void initialize(Bundle savedInstanceState) {
         // Neu erzeugen oder rekonstruieren
-        m_currentRiddle = new Riddle(8, savedInstanceState);
+        m_currentRiddle = new Riddle(getNumberOfBits(), savedInstanceState);
         m_numberOfBits = m_currentRiddle.NumberOfBits;
 
         // Die äußere visuelle Darstellung
@@ -98,6 +106,24 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
 
         // Initiales zeichnen
         refresh();
+    }
+
+    // Ermittelt den Namen für die Einstellung der aktuellen Spielstärke.
+    private String getNumberOfBitsSettingName() {
+        return getResources().getString(R.string.pref_strength_key);
+    }
+
+    // Ermittelt die aktuelle Spielstärke.
+    private int getNumberOfBits() {
+        String level = PreferenceManager.getDefaultSharedPreferences(this).getString(getNumberOfBitsSettingName(), null);
+        if ("A".equals(level))
+            return 8;
+        else if ("B".equals(level))
+            return 9;
+        else if ("C".equals(level))
+            return 10;
+        else
+            return 8;
     }
 
     private void refresh() {
@@ -283,7 +309,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
             case R.id.action_settings:
                 Intent intent = new Intent();
                 intent.setClass(this, SettingsActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, SETTINGS_RESULT);
 
                 return true;
             default:
@@ -300,7 +326,6 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
         Intent intent = new Intent();
         intent.setClass(this, HelpAndIntro.class);
         intent.putExtra(HelpAndIntro.EXTRA_NUMBER_OF_BITS, m_numberOfBits);
-        startActivity(intent);
     }
 
     @Override
@@ -344,5 +369,15 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
                 finishAnimation();
             }
         }, 10);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Nachsehen, ob die Einstellungen verändert wurden
+        if (requestCode == SETTINGS_RESULT)
+            if (resultCode == RESULT_OK)
+                initialize(null);
     }
 }

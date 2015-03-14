@@ -1,5 +1,6 @@
 package net.psimarron.bitme;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -15,9 +16,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         // Konfiguration der Einstellungen laden
         addPreferencesFromResource(R.xml.preferences);
 
-        // Änderungen aktualisieren die Anzeige
-        PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
-
         // Beschreibungen setzen
         updateSummaries();
     }
@@ -31,6 +29,31 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        // Wir sind nicht mehr aktiv
+        Activity activity = getActivity();
+        if (activity == null)
+            return;
+
+        // Neuladen des Spiels erzwingen - im Moment ist das in Ordnung, später wollen wir vielleicht etwas genauer hinschauen
+        activity.setResult(Activity.RESULT_OK);
+
+        // Anzeige aktualisieren
         updateSummaries();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // Änderungen aktualisieren die Anzeige
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // Wird sind nun nicht mehr an Informationen über Änderungen interessiert
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).unregisterOnSharedPreferenceChangeListener(this);
     }
 }
