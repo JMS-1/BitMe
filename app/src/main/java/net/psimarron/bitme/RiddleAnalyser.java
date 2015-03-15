@@ -16,12 +16,12 @@ final class RiddleAnalyser {
     }
 
     // Ermittelt zu einem Rätsel die minimale Anzahl der notwendigen Bitvertauschungen.
-    public static int getPar(Riddle riddle) {
+    public static int getPar(Riddle riddle, int guess) {
         // Analyseumgebung aufsetzen
         RiddleAnalyser analyser = new RiddleAnalyser(riddle.Goal);
 
         // Analyse durchführen
-        return analyser.analyse(0, riddle.getGuess(), riddle);
+        return analyser.analyse(0, guess, riddle);
     }
 
     // Führt eine Überprüfung auf einer Ebene durch.

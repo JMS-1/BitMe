@@ -8,31 +8,22 @@ import java.util.Random;
 public class Riddle {
     // Stellt Zufallszahlen bereit.
     private final static Random s_generator = new Random();
-
+    // Der Name der Ablage für die Anzahl der Bits.
+    private final static String STATE_NUMBER_OF_BITS = "numberOfBits";
+    // Der Name der Ablage für die Zielzahl.
+    private final static String STATE_GOAL = "goal";
+    // Der Name der Ablage für den aktuellen Rateversuch.
+    private final static String STATE_CURRENT = "guess";
+    // Der Name der Ablage für den ersten Rateversuch.
+    private final static String STATE_FIRST = "firstGuess";
+    // Der Name der Ablage für die berits vorgenommenen Vertauschungen.
+    private final static String STATE_TRIES = "tries";
     // 8 Bits reichen erst einmal - es soll ja für Anfänger sein und wenn man das Prinzip verstanden hat, ist es eh egal.
     public final int NumberOfBits;
-
     // Die zu ratende Zahl.
     public final int Goal;
-
     // Die minimale Anzahl von Verschiebungen.
     public final int Par;
-
-    // Der Name der Ablage für die Anzahl der Bits.
-    private final String STATE_NUMBER_OF_BITS = "numberOfBits";
-
-    // Der Name der Ablage für die Zielzahl.
-    private final String STATE_GOAL = "goal";
-
-    // Der Name der Ablage für den aktuellen Rateversuch.
-    private final String STATE_CURRENT = "guess";
-
-    // Der Name der Ablage für den ersten Rateversuch.
-    private final String STATE_FIRST = "firstGuess";
-
-    // Der Name der Ablage für die berits vorgenommenen Vertauschungen.
-    private final String STATE_TRIES = "tries";
-
     // Der erste Rateversuch.
     private final int m_firstGuess;
 
@@ -62,28 +53,24 @@ public class Riddle {
                 swap(i, i + 1);
             }
 
-            // Wenn es jetzt schon passt müssen wir korrigieren ansonsten
+            // Wenn es jetzt schon passt müssen wir korrigieren
             if (isMatch())
                 move(0);
 
             // Das ist der Anfangswert und die Zahl der Versuche ist immer 0
+            m_firstGuess = m_guess;
             m_tries = 0;
         } else {
             // Rekonstruieren
             NumberOfBits = bundle.getInt(STATE_NUMBER_OF_BITS);
+            m_firstGuess = bundle.getInt(STATE_FIRST);
             m_guess = bundle.getInt(STATE_CURRENT);
             m_tries = bundle.getInt(STATE_TRIES);
             Goal = bundle.getInt(STATE_GOAL);
         }
 
         // Minimale Anzahl von Versuchen ermitteln
-        Par = RiddleAnalyser.getPar(this);
-
-        // Anfangsstand merken
-        if (bundle == null)
-            m_firstGuess = m_guess;
-        else
-            m_firstGuess = bundle.getInt(STATE_FIRST);
+        Par = RiddleAnalyser.getPar(this, m_firstGuess);
     }
 
     // Überträgt dieses Rätsel in die Ablage.
@@ -146,11 +133,6 @@ public class Riddle {
     // Meldet, ob der Zielwert zusammengebaut wurde.
     public boolean isMatch() {
         return (m_guess == Goal);
-    }
-
-    // Meldet den aktuellen Ratewert.
-    public int getGuess() {
-        return m_guess;
     }
 
     // Meldet die Anzahl der Versuche.

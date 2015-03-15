@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -20,22 +19,22 @@ import android.widget.TextView;
 public class TheRiddle extends Activity implements View.OnTouchListener, Animation.AnimationListener {
 
     // Die Weite der horizontalen Verschiebung des ausgewählten Bits.
-    private final int ANIMATION_OFFSET = 200;
+    private final static int ANIMATION_OFFSET = 200;
 
     // Die Zeit in Millisekunden für die horizontale Verschiebung bis zur weitesten Entfernung.
-    private final int ANIMATION_TIME_FLING = 200;
+    private final static int ANIMATION_TIME_FLING = 200;
 
     // Die Startverzögerung in Millisekunden für den Beginn des freien Falls.
-    private final int ANIMATION_TIME_FALL_OFFSET = ANIMATION_TIME_FLING / 4;
+    private final static int ANIMATION_TIME_FALL_OFFSET = ANIMATION_TIME_FLING / 4;
 
     // Die Startverzögerung in Millisekunden zwischen dem Fall der einzelnen Bits.
-    private final int ANIMATION_TIME_FALL_DELAY = ANIMATION_TIME_FALL_OFFSET;
+    private final static int ANIMATION_TIME_FALL_DELAY = ANIMATION_TIME_FALL_OFFSET;
 
     // Die Fallzeit in Millisekunden für jedes einzelne Bit.
-    private final int ANIMATION_TIME_FALL = 4 * ANIMATION_TIME_FLING - 2 * (ANIMATION_TIME_FALL_OFFSET + ANIMATION_TIME_FALL_DELAY);
+    private final static int ANIMATION_TIME_FALL = 4 * ANIMATION_TIME_FLING - 2 * (ANIMATION_TIME_FALL_OFFSET + ANIMATION_TIME_FALL_DELAY);
 
     // Das Ergebnis der Änderung der Einstellungen.
-    private final int SETTINGS_RESULT = 1;
+    private final static int SETTINGS_RESULT = 1;
 
     // Das aktuelle Rätsel.
     private Riddle m_currentRiddle;
@@ -65,37 +64,30 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Einstellungen definieren
+        // Voreinstellungen definieren
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         // Aufbauen
         initialize(savedInstanceState);
     }
 
+    // Erzeugt alle Oberflächenelemente.
     private void initialize(Bundle savedInstanceState) {
         // Neu erzeugen oder rekonstruieren
         m_currentRiddle = new Riddle(getNumberOfBits(), savedInstanceState);
         m_numberOfBits = m_currentRiddle.NumberOfBits;
 
-        // Die äußere visuelle Darstellung
-        LayoutInflater inflater = getLayoutInflater();
-        View content = inflater.inflate(R.layout.activity_the_riddle, null);
+        setContentView(R.layout.activity_the_riddle);
 
-        setContentView(content);
-
-        // Im Moment verwenden wir eine geschachtelte Darstellung zum Abblenden des Hintergrunds - TODO: vermutlich wäre das eher eine Aufgabe für ein LayerDrawable
-        m_bitContainer = (ViewGroup) content.findViewById(R.id.game_container);
-
-        // Die relevanten Oberflächenelemente
+        // Die relevanten Oberflächenelemente, im Moment verwenden wir eine geschachtelte Darstellung zum Abblenden des Hintergrunds - TODO: vermutlich wäre das eher eine Aufgabe für ein LayerDrawable
+        m_bitContainer = (ViewGroup) findViewById(R.id.game_container);
         m_guess = (TextView) findViewById(R.id.view_guess);
         m_bits = new View[m_numberOfBits];
 
         // Für jedes Bit wird dynamisch eine entsprechende Repräsentation erzeugt
         for (int i = 0; i < m_bits.length; i++) {
-            // Am einfachsten geht das aus einer Vorlage - die zusätzliche Schachtelung erleichtert die Manipulation der LayoutParameter
-            ViewGroup template = (ViewGroup) inflater.inflate(R.layout.bit, null);
-            View bit = template.findViewById(R.id.bit_display);
-            template.removeView(bit);
+            // Am einfachsten geht das aus einer Vorlage
+            View bit = getLayoutInflater().inflate(R.layout.bit, m_bitContainer, false);
 
             // Die Anzeige des Bits vorbereiten
             bit.setOnTouchListener(this);
@@ -126,6 +118,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
             return 8;
     }
 
+    // Aktualisiert alle Oberflächenelemente.
     private void refresh() {
         // Wir passen auch die Überschrift entsprechend an
         setTitle(getResources().getString(R.string.app_title, m_currentRiddle.Goal));
@@ -268,6 +261,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
             m_bits[i].startAnimation(m_bits[i].getAnimation());
     }
 
+    // Die Animation der Bits ist abgeschlossen, wir können nun die gewünschte Verschiebung durchführen.
     private void finishAnimation() {
         // Alle Präsentationen werden an den korrekten Platz geschoben
         for (int i = m_currentAnimation; i < m_bits.length; i++)
@@ -307,6 +301,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
                 m_currentRiddle.restart();
                 break;
             case R.id.action_settings:
+                // Einstellungen anzeigen und das Ergebnis abwarten
                 Intent intent = new Intent();
                 intent.setClass(this, SettingsActivity.class);
                 startActivityForResult(intent, SETTINGS_RESULT);

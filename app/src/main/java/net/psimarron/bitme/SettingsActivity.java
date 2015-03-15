@@ -12,7 +12,7 @@ public class SettingsActivity extends Activity {
         // Gehen wir erst einmal davon aus, dass nichts verändert wurde
         setResult(RESULT_CANCELED);
 
-        // Unsere eigene Konfigurationselemente eintragen
+        // Unsere eigenen Konfigurationselemente eintragen
         getFragmentManager()
                 .beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
