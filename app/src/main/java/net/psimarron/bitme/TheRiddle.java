@@ -3,7 +3,12 @@ package net.psimarron.bitme;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,8 +20,10 @@ import android.view.animation.AnimationSet;
 import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
+import java.nio.ByteBuffer;
+
 // Das ist die Aktivität mit dem eigentlichen Spiel.
-public class TheRiddle extends Activity implements View.OnTouchListener, Animation.AnimationListener {
+public class TheRiddle extends Activity implements View.OnTouchListener, Animation.AnimationListener, NfcAdapter.CreateNdefMessageCallback {
 
     // Die Weite der horizontalen Verschiebung des ausgewählten Bits.
     private final static int ANIMATION_OFFSET = 200;
@@ -60,9 +67,17 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
     // Die Anzahl der Animationen, die noch abgewartet werden müssen.
     private int m_pendingAnimations;
 
+    // Zur Übertragung des Rätsels an ein anderes SmartPhone.
+    private NfcAdapter m_nfcAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Die Übertragung an andere Rechner ist optional
+        m_nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (m_nfcAdapter != null)
+            m_nfcAdapter.setNdefPushMessageCallback(this, this);
 
         // Voreinstellungen definieren
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -375,5 +390,73 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
         if (requestCode == SETTINGS_RESULT)
             if (resultCode == RESULT_OK)
                 initialize(null);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Schauen wir einmal nach, ob wir ein Rätsel übermittelt bekommen haben
+        Intent intent = getIntent();
+        if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction()))
+            startFromNdefMessage(intent);
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        setIntent(intent);
+    }
+
+    @Override
+    public NdefMessage createNdefMessage(NfcEvent event) {
+        // Wir machen uns hier das Leben etwas einfacher und verwenden die Java Bibliotheken
+        ByteBuffer data = ByteBuffer.allocate(12);
+        data.putInt(m_currentRiddle.NumberOfBits);
+        data.putInt(m_currentRiddle.Goal);
+        data.putInt(m_currentRiddle.FirstGuess);
+
+        // Wir verpacken das nun in eine NCF Nachricht mit zusätzlichem AAR
+        NdefMessage msg = new NdefMessage(new NdefRecord[]
+                {
+                        NdefRecord.createMime("application/vnd.net.psimarron.bitme.v0", data.array()),
+                        NdefRecord.createApplicationRecord("net.psimarron.bitme")
+                });
+
+        // Und das senden wir an den Partner
+        return msg;
+    }
+
+    // Initialisiert die Oberfläche aus einem Rätsel auf einem anderen SmartPhone
+    private void startFromNdefMessage(Intent intent) {
+        // Wir holen uns einfach blind die Daten - solang das Manifest korrekt aufgesetzt ist, kann es eigentlich keine Probleme geben
+        Parcelable[] messages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+        if (messages == null)
+            return;
+        if (messages.length < 1)
+            return;
+
+        NdefRecord[] records = ((NdefMessage) messages[0]).getRecords();
+        if (records == null)
+            return;
+        if (records.length < 1)
+            return;
+
+        NdefRecord firstRecord = records[0];
+        if (firstRecord == null)
+            return;
+        byte[] data = firstRecord.getPayload();
+        if (data == null)
+            return;
+        if (data.length != 12)
+            return;
+
+        // Nun müssen wir das nur rekonstruieren
+        ByteBuffer reader = ByteBuffer.wrap(data);
+        int numberOfBits = reader.getInt();
+        int goal = reader.getInt();
+        int first = reader.getInt();
+
+        // Schließlich tun wir einfach so, als wären wir aufgeweckt worden
+        initialize(Riddle.toBundle(numberOfBits, goal, first));
     }
 }

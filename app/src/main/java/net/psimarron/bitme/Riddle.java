@@ -8,24 +8,33 @@ import java.util.Random;
 public class Riddle {
     // Stellt Zufallszahlen bereit.
     private final static Random s_generator = new Random();
+
     // Der Name der Ablage für die Anzahl der Bits.
     private final static String STATE_NUMBER_OF_BITS = "numberOfBits";
+
     // Der Name der Ablage für die Zielzahl.
     private final static String STATE_GOAL = "goal";
+
     // Der Name der Ablage für den aktuellen Rateversuch.
     private final static String STATE_CURRENT = "guess";
+
     // Der Name der Ablage für den ersten Rateversuch.
     private final static String STATE_FIRST = "firstGuess";
+
     // Der Name der Ablage für die berits vorgenommenen Vertauschungen.
     private final static String STATE_TRIES = "tries";
+
     // 8 Bits reichen erst einmal - es soll ja für Anfänger sein und wenn man das Prinzip verstanden hat, ist es eh egal.
     public final int NumberOfBits;
+
     // Die zu ratende Zahl.
     public final int Goal;
+
     // Die minimale Anzahl von Verschiebungen.
     public final int Par;
+
     // Der erste Rateversuch.
-    private final int m_firstGuess;
+    public final int FirstGuess;
 
     // Der aktuelle Rateversuch.
     private int m_guess;
@@ -58,25 +67,39 @@ public class Riddle {
                 move(0);
 
             // Das ist der Anfangswert und die Zahl der Versuche ist immer 0
-            m_firstGuess = m_guess;
+            FirstGuess = m_guess;
             m_tries = 0;
         } else {
             // Rekonstruieren
             NumberOfBits = bundle.getInt(STATE_NUMBER_OF_BITS);
-            m_firstGuess = bundle.getInt(STATE_FIRST);
+            FirstGuess = bundle.getInt(STATE_FIRST);
             m_guess = bundle.getInt(STATE_CURRENT);
             m_tries = bundle.getInt(STATE_TRIES);
             Goal = bundle.getInt(STATE_GOAL);
         }
 
         // Minimale Anzahl von Versuchen ermitteln
-        Par = RiddleAnalyser.getPar(this, m_firstGuess);
+        Par = RiddleAnalyser.getPar(this, FirstGuess);
+    }
+
+    // Erstellt eine Ablage
+    public static Bundle toBundle(int numberOfBits, int goal, int first) {
+        Bundle bundle = new Bundle();
+
+        // So sähe ein gespeicherter Zustand aus
+        bundle.putInt(STATE_NUMBER_OF_BITS, numberOfBits);
+        bundle.putInt(STATE_CURRENT, first);
+        bundle.putInt(STATE_FIRST, first);
+        bundle.putInt(STATE_GOAL, goal);
+        bundle.putInt(STATE_TRIES, 0);
+
+        return bundle;
     }
 
     // Überträgt dieses Rätsel in die Ablage.
     public void save(Bundle bundle) {
         bundle.putInt(STATE_NUMBER_OF_BITS, NumberOfBits);
-        bundle.putInt(STATE_FIRST, m_firstGuess);
+        bundle.putInt(STATE_FIRST, FirstGuess);
         bundle.putInt(STATE_CURRENT, m_guess);
         bundle.putInt(STATE_TRIES, m_tries);
         bundle.putInt(STATE_GOAL, Goal);
@@ -143,7 +166,7 @@ public class Riddle {
     // Das selbe Rätsel von vorne.
     public void restart() {
         // Zurücksetzen
-        m_guess = m_firstGuess;
+        m_guess = FirstGuess;
         m_tries = 0;
     }
 }
