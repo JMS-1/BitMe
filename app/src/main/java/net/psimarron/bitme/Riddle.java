@@ -82,7 +82,7 @@ public class Riddle {
         Par = RiddleAnalyser.getPar(this, FirstGuess);
     }
 
-    // Erstellt eine Ablage
+    // Erstellt eine Ablage.
     public static Bundle toBundle(int numberOfBits, int goal, int first) {
         Bundle bundle = new Bundle();
 
