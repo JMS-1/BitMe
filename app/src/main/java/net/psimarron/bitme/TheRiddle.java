@@ -309,7 +309,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
         switch (item.getItemId()) {
             case R.id.action_new:
                 // Mit neuer Zahl starten
-                m_currentRiddle = new Riddle(m_numberOfBits, null);
+                initialize(null);
                 break;
             case R.id.action_reset:
                 // Mit der selben Zahl und der selben Anordnung der Bits starten
