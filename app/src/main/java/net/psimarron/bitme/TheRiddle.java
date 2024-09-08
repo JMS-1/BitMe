@@ -76,8 +76,7 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
 
         // Die Übertragung an andere Rechner ist optional
         m_nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        if (m_nfcAdapter != null)
-            m_nfcAdapter.setNdefPushMessageCallback(this, this);
+        //[TODO] if (m_nfcAdapter != null) m_nfcAdapter.setNdefPushMessageCallback(this, this);
 
         // Voreinstellungen definieren
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -306,25 +305,24 @@ public class TheRiddle extends Activity implements View.OnTouchListener, Animati
             return super.onOptionsItemSelected(item);
 
         // Mal schauen, was der Anwender von uns will
-        switch (item.getItemId()) {
-            case R.id.action_new:
-                // Mit neuer Zahl starten
-                initialize(null);
-                break;
-            case R.id.action_reset:
-                // Mit der selben Zahl und der selben Anordnung der Bits starten
-                m_currentRiddle.restart();
-                break;
-            case R.id.action_settings:
-                // Einstellungen anzeigen und das Ergebnis abwarten
-                Intent intent = new Intent();
-                intent.setClass(this, SettingsActivity.class);
-                startActivityForResult(intent, SETTINGS_RESULT);
+        int itemId = item.getItemId();
 
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (itemId == R.id.action_new)
+            // Mit neuer Zahl starten
+            initialize(null);
+        else if(itemId == R.id.action_reset)
+            // Mit der selben Zahl und der selben Anordnung der Bits starten
+            m_currentRiddle.restart();
+        else if (itemId == R.id.action_settings) {
+            // Einstellungen anzeigen und das Ergebnis abwarten
+            Intent intent = new Intent();
+            intent.setClass(this, SettingsActivity.class);
+            startActivityForResult(intent, SETTINGS_RESULT);
+
+            return true;
         }
+        else
+            return super.onOptionsItemSelected(item);
 
         // Neu zeichnen
         refresh();
