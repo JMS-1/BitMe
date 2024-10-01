@@ -8,10 +8,10 @@ android {
 
     defaultConfig {
         applicationId = "net.psimarron.bitme"
-        minSdk = 29
+        minSdk = 26
         targetSdk = 34
-        versionCode = 22
-        versionName = "2.2"
+        versionCode = 23
+        versionName = "2.3"
     }
 
     buildTypes {
