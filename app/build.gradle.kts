@@ -8,12 +8,10 @@ android {
 
     defaultConfig {
         applicationId = "net.psimarron.bitme"
-        minSdk = 33
+        minSdk = 29
         targetSdk = 34
-        versionCode = 21
-        versionName = "2.1"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        versionCode = 22
+        versionName = "2.2"
     }
 
     buildTypes {
@@ -47,7 +45,4 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
 }
