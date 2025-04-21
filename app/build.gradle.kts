@@ -4,19 +4,19 @@ plugins {
 
 android {
     namespace = "net.psimarron.bitme"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "net.psimarron.bitme"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 23
-        versionName = "2.3"
+        targetSdk = 35
+        versionCode = 25
+        versionName = "2.5"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -40,7 +40,6 @@ androidComponents {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
